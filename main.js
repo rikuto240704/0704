@@ -19,9 +19,9 @@ const config = {
 const game = new Phaser.Game(config);
 
 function preload() {
-    this.load.image('player', player.jpg');
-    this.load.image('bullet', bullet.jpg');
-    this.load.image('enemy', 'enemy.jpg');
+    this.load.image('player', 'assets/player.jpg');
+    this.load.image('bullet', 'assets/bullet.jpg');
+    this.load.image('enemy', 'assets/enemy.jpg');
 }
 
 let score = 0;
