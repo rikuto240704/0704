@@ -1,0 +1,7 @@
+/your-project-directory
+    ├── index.html
+    ├── main.js
+    └── assets
+        └── player.jpg (プレイヤーキャラクターの画像)
+        └── bullet.jpg (弾の画像)
+        └── enemy.jpg (敵キャラクターの画像)
