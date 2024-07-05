@@ -28,47 +28,40 @@ function preload() {
 let score = 0;
 let scoreText;
 let lastEnemyTime = 0;
-let gameStarted = false;
-let startText;
 
 function create() {
     // 背景色を白色に設定
     this.add.rectangle(600, 450, 1200, 900, 0xFFFFFF).setOrigin(0.5, 0.5);
 
-    // ゲーム説明テキストを表示
-    startText = this.add.text(600, 450, 'sキーを押してゲーム開始', { fontSize: '32px', fill: '#000' }).setOrigin(0.5, 0.5);
+    // プレイヤーのサイズを小さく設定
+    this.player = this.physics.add.sprite(600, 750, 'player').setScale(0.5); // サイズを小さく設定
+    this.player.setCollideWorldBounds(true);
 
-    // Enterキー入力を検出
-    this.enterKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.s);
-
-    // ゲーム開始後に使う要素を予め作成
-    this.player = this.physics.add.sprite(600, 750, 'player').setScale(0.5).setCollideWorldBounds(true).setVisible(false);
     this.cursors = this.input.keyboard.createCursorKeys();
+    this.spaceBar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+
+    // 弾のグループを作成
     this.bullets = this.physics.add.group({
         defaultKey: 'bullet',
         maxSize: 10
     });
+
+    // 敵のグループを作成
     this.enemies = this.physics.add.group();
+
+    // 弾と敵の衝突を検出
     this.physics.add.collider(this.bullets, this.enemies, hitEnemy, null, this);
+    // プレイヤーと敵の衝突を検出
     this.physics.add.collider(this.player, this.enemies, hitPlayer, null, this);
-    scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '32px', fill: '#000' }).setVisible(false);
 
-    // ゲームが開始されていない状態でupdate関数の一部をスキップするためのフラグ
-    this.input.keyboard.on('keydown-ENTER', startGame, this);
-}
+    // スコア表示用のテキストを設定
+    scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '32px', fill: '#000' });
 
-function startGame() {
-    if (!gameStarted) {
-        gameStarted = true;
-        startText.setVisible(false);
-        this.player.setVisible(true);
-        scoreText.setVisible(true);
-    }
+    // 最後に敵が出現した時間を初期化
+    this.lastFired = 0;
 }
 
 function update(time) {
-    if (!gameStarted) return;
-
     // プレイヤーの移動
     if (this.cursors.left.isDown) {
         this.player.setVelocityX(-200);
@@ -128,6 +121,7 @@ function hitEnemy(bullet, enemy) {
 function hitPlayer(player, enemy) {
     this.physics.pause();
     player.setTint(0xff0000);
+    player.anims.play('turn');
     alert('ゲームオーバー');
     location.reload();
 }
