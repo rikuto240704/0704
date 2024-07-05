@@ -21,7 +21,8 @@ const game = new Phaser.Game(config);
 function preload() {
     this.load.image('player', 'assets/player.jpg');
     this.load.image('bullet', 'assets/bullet.jpg');
-    this.load.image('enemy', 'assets/enemy.jpg');
+    this.load.image('enemy1', 'assets/enemy1.jpg');   // 追加
+    this.load.image('enemy2', 'assets/enemy2.jpg');   // 追加
 }
 
 let score = 0;
@@ -29,7 +30,7 @@ let scoreText;
 let lastEnemyTime = 0;
 
 function create() {
-    this.player = this.physics.add.sprite(400, 500, 'player');
+    this.player = this.physics.add.sprite(400, 500, 'player').setScale(0.5); // サイズを小さく設定
     this.player.setCollideWorldBounds(true);
 
     this.cursors = this.input.keyboard.createCursorKeys();
@@ -65,6 +66,7 @@ function update(time) {
             bullet.setActive(true);
             bullet.setVisible(true);
             bullet.body.velocity.y = -300;
+            bullet.setScale(0.5); // サイズを小さく設定
             this.lastFired = time + 300;
         }
     }
@@ -79,8 +81,10 @@ function update(time) {
     // 敵のランダム出現
     if (time > lastEnemyTime) {
         const x = Phaser.Math.Between(50, 750);
-        const enemy = this.enemies.create(x, 0, 'enemy');
+        const enemyType = Phaser.Math.Between(1, 2); // 1 または 2 をランダムに選択
+        const enemy = this.enemies.create(x, 0, 'enemy' + enemyType); // enemy1 または enemy2 を生成
         enemy.setVelocityY(100);
+        enemy.setScale(0.5); // サイズを小さく設定
         lastEnemyTime = time + 2000; // 次の敵が出現するまでの間隔を設定
     }
 
