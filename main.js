@@ -5,8 +5,8 @@ const config = {
     physics: {
         default: 'arcade',
         arcade: {
-            gravity: { y: 0 },
-            debug: false
+            gravity: { y: 0 }, // 重力を無効化
+            debug: false // デバッグ表示を無効化
         }
     },
     scene: {
@@ -16,27 +16,31 @@ const config = {
     }
 };
 
-const game = new Phaser.Game(config);
+const game = new Phaser.Game(config); // ゲームを作成
 
 function preload() {
-    this.load.image('player', 'assets/player.jpg');
-    this.load.image('bullet', 'assets/bullet.png');  
-    this.load.image('enemy1', 'assets/enemy1.jpg');  
-    this.load.image('enemy2', 'assets/enemy2.jpg');  
+    this.load.image('player', 'assets/player.jpg'); // プレイヤーの画像を読み込み
+    this.load.image('bullet', 'assets/bullet.png'); // 弾の画像を読み込み
+    this.load.image('enemy1', 'assets/enemy1.jpg'); // 敵1の画像を読み込み
+    this.load.image('enemy2', 'assets/enemy2.jpg'); // 敵2の画像を読み込み
 }
 
-let score = 0;
-let scoreText;
-let lastEnemyTime = 0;
+let score = 0; // スコアを初期化
+let scoreText; // スコア表示用のテキスト
+let lastEnemyTime = 0; // 最後に敵が出現した時間
+let lastTapTime = 0; // 最後にタップされた時間
+let touchStartX = 0; // スワイプの開始位置
+let touchEndX = 0; // スワイプの終了位置
 
 function create() {
     // 背景色を白色に設定
     this.add.rectangle(600, 450, 1200, 900, 0xFFFFFF).setOrigin(0.5, 0.5);
 
-    // プレイヤーのサイズを小さく設定
-    this.player = this.physics.add.sprite(600, 750, 'player').setScale(0.5); // サイズを小さく設定
-    this.player.setCollideWorldBounds(true);
+    // プレイヤーを作成し、サイズを小さく設定
+    this.player = this.physics.add.sprite(600, 750, 'player').setScale(0.5);
+    this.player.setCollideWorldBounds(true); // 画面端での衝突を有効化
 
+    // キーボード入力を設定
     this.cursors = this.input.keyboard.createCursorKeys();
     this.spaceBar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
 
@@ -59,10 +63,43 @@ function create() {
 
     // 最後に敵が出現した時間を初期化
     this.lastFired = 0;
+
+    // タッチ入力を設定
+    this.input.on('pointerdown', function(pointer) {
+        const currentTime = this.time.now;
+
+        // スワイプの開始位置を記録
+        touchStartX = pointer.x;
+
+        // ダブルタップの判定
+        if (currentTime - lastTapTime < 300) {
+            fireBullet.call(this, currentTime);
+        }
+        lastTapTime = currentTime;
+    }, this);
+
+    // タッチ移動を設定
+    this.input.on('pointermove', function(pointer) {
+        if (pointer.isDown) {
+            touchEndX = pointer.x;
+            const diffX = touchEndX - touchStartX;
+
+            if (Math.abs(diffX) > 10) {
+                this.player.setVelocityX(diffX * 2);
+            } else {
+                this.player.setVelocityX(0);
+            }
+        }
+    }, this);
+
+    // タッチ終了を設定
+    this.input.on('pointerup', function() {
+        this.player.setVelocityX(0);
+    }, this);
 }
 
 function update(time) {
-    // プレイヤーの移動
+    // キーボードによるプレイヤーの移動
     if (this.cursors.left.isDown) {
         this.player.setVelocityX(-200);
     } else if (this.cursors.right.isDown) {
@@ -71,16 +108,9 @@ function update(time) {
         this.player.setVelocityX(0);
     }
 
-    // スペースキーが押されたら弾を発射
+    // キーボードによる弾の発射
     if (this.spaceBar.isDown && time > this.lastFired) {
-        const bullet = this.bullets.get(this.player.x, this.player.y - 20);
-        if (bullet) {
-            bullet.setActive(true);
-            bullet.setVisible(true);
-            bullet.body.velocity.y = -300;
-            bullet.setScale(0.5); // サイズを小さく設定
-            this.lastFired = time + 300;
-        }
+        fireBullet.call(this, time);
     }
 
     // 弾の自動除去
@@ -96,7 +126,7 @@ function update(time) {
         const x = Phaser.Math.Between(75, 1125); // X座標を調整
         const enemyType = Phaser.Math.Between(1, 2); // 1 または 2 をランダムに選択
         const enemy = this.enemies.create(x, 0, 'enemy' + enemyType); // enemy1 または enemy2 を生成
-        enemy.setVelocityY(100);
+        enemy.setVelocityY(100); // 下方向に移動
         enemy.setScale(0.5); // サイズを小さく設定
         lastEnemyTime = time + 2000; // 次の敵が出現するまでの間隔を設定
     }
@@ -109,19 +139,30 @@ function update(time) {
     }, this);
 }
 
+function fireBullet(time) {
+    const bullet = this.bullets.get(this.player.x, this.player.y - 20);
+    if (bullet) {
+        bullet.setActive(true);
+        bullet.setVisible(true);
+        bullet.body.velocity.y = -300;
+        bullet.setScale(0.5); // サイズを小さく設定
+        this.lastFired = time + 300; // 発射間隔を設定
+    }
+}
+
 function hitEnemy(bullet, enemy) {
     bullet.setActive(false);
     bullet.setVisible(false);
-    enemy.destroy();
+    enemy.destroy(); // 敵を破壊
 
-    score += 10;
-    scoreText.setText('Score: ' + score);
+    score += 10; // スコアを加算
+    scoreText.setText('Score: ' + score); // スコアを更新
 }
 
 function hitPlayer(player, enemy) {
-    this.physics.pause();
-    player.setTint(0xff0000);
-    player.anims.play('turn');
-    alert('ゲームオーバー');
-    location.reload();
+    this.physics.pause(); // 物理演算を停止
+    player.setTint(0xff0000); // プレイヤーを赤く表示
+    player.anims.play('turn'); // プレイヤーのアニメーションを再生
+    alert('ゲームオーバー'); // ゲームオーバーのアラートを表示
+    location.reload(); // ページをリロードしてゲームを再開
 }
