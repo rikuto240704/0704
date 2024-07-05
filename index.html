@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>シューティングゲーム</title>
     <script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.js"></script>
-    <script src="main.js"></script>
+    <script src="main.js" defer></script>
     <style>
         body {
             margin: 0;
@@ -15,9 +15,39 @@
             align-items: center;
             height: 100vh;
             background-color: #2c3e50;
+            color: white;
+            font-family: Arial, sans-serif;
+            flex-direction: column;
+        }
+        #game-container {
+            display: none;
+        }
+        #instructions {
+            text-align: center;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
+    <div id="instructions">
+        <h1>シューティングゲーム</h1>
+        <p>ゲームのやり方:</p>
+        <p>右に行くときは右キー、左に行くときは左キーを使用してください。</p>
+        <p>上に行くときは上キー、下に行くときは下キーを使用してください。</p>
+        <p>スペースキーを押して弾を撃つことができます。</p>
+        <button id="start-button">ゲームを始める</button>
+    </div>
+    <div id="game-container"></div>
+    <script>
+        document.getElementById('start-button').addEventListener('click', function() {
+            document.getElementById('instructions').style.display = 'none';
+            document.getElementById('game-container').style.display = 'block';
+            const game = new Phaser.Game(config);
+        });
+    </script>
 </body>
 </html>
