@@ -1,7 +1,7 @@
 const config = {
     type: Phaser.AUTO,
-    width: 1200, // 横幅を1.5倍に変更
-    height: 900, // 縦幅を1.5倍に変更
+    width: 1200,
+    height: 900,
     physics: {
         default: 'arcade',
         arcade: {
@@ -96,14 +96,14 @@ function update(time) {
         const x = Phaser.Math.Between(75, 1125); // X座標を調整
         const enemyType = Phaser.Math.Between(1, 2); // 1 または 2 をランダムに選択
         const enemy = this.enemies.create(x, 0, 'enemy' + enemyType); // enemy1 または enemy2 を生成
-        enemy.setVelocityY(100);
+        enemy.setVelocityY(Phaser.Math.Between(50, 150)); // 落下速度をランダムに設定
         enemy.setScale(0.5); // サイズを小さく設定
-        lastEnemyTime = time + 2000; // 次の敵が出現するまでの間隔を設定
+        lastEnemyTime = time + Phaser.Math.Between(1000, 3000); // 出現間隔をランダムに設定
     }
 
     // 敵の自動除去
     this.enemies.children.each(function(enemy) {
-        if (enemy.active && enemy.y > 900) { // Y座標の条件を調整
+        if (enemy.active && enemy.y > 900) {
             enemy.destroy();
         }
     }, this);
