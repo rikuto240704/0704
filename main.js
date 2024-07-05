@@ -20,9 +20,9 @@ const game = new Phaser.Game(config);
 
 function preload() {
     this.load.image('player', 'assets/player.jpg');
-    this.load.image('bullet', 'assets/bullet.jpg');
-    this.load.image('enemy1', 'assets/enemy1.jpg');   // 追加
-    this.load.image('enemy2', 'assets/enemy2.jpg');   // 追加
+    this.load.image('bullet', 'assets/bullet.png');  // 変更された行
+    this.load.image('enemy1', 'assets/enemy1.jpg');  
+    this.load.image('enemy2', 'assets/enemy2.jpg');  
 }
 
 let score = 0;
