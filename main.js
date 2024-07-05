@@ -19,10 +19,14 @@ const config = {
 const game = new Phaser.Game(config);
 
 function preload() {
-    this.load.image('player', 'player.jpg');
-    this.load.image('bullet', 'bullet.jpg');
-    this.load.image('enemy', 'enemy.jpg');
+    this.load.image('player', 'assets/player.jpg');
+    this.load.image('bullet', 'assets/bullet.jpg');
+    this.load.image('enemy', 'assets/enemy.jpg');
 }
+
+let score = 0;
+let scoreText;
+let lastEnemyTime = 0;
 
 function create() {
     this.player = this.physics.add.sprite(400, 500, 'player');
@@ -36,14 +40,12 @@ function create() {
         maxSize: 10
     });
 
-    this.enemies = this.physics.add.group({
-        key: 'enemy',
-        repeat: 5,
-        setXY: { x: 100, y: 100, stepX: 100 }
-    });
+    this.enemies = this.physics.add.group();
 
     this.physics.add.collider(this.bullets, this.enemies, hitEnemy, null, this);
     this.physics.add.collider(this.player, this.enemies, hitPlayer, null, this);
+
+    scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '32px', fill: '#fff' });
 
     this.lastFired = 0;
 }
@@ -73,17 +75,35 @@ function update(time) {
             bullet.setVisible(false);
         }
     }, this);
+
+    // 敵のランダム出現
+    if (time > lastEnemyTime) {
+        const x = Phaser.Math.Between(50, 750);
+        const enemy = this.enemies.create(x, 0, 'enemy');
+        enemy.setVelocityY(100);
+        lastEnemyTime = time + 2000; // 次の敵が出現するまでの間隔を設定
+    }
+
+    this.enemies.children.each(function(enemy) {
+        if (enemy.active && enemy.y > 600) {
+            enemy.destroy();
+        }
+    }, this);
 }
 
 function hitEnemy(bullet, enemy) {
     bullet.setActive(false);
     bullet.setVisible(false);
     enemy.destroy();
+
+    score += 10;
+    scoreText.setText('Score: ' + score);
 }
 
 function hitPlayer(player, enemy) {
     this.physics.pause();
     player.setTint(0xff0000);
     player.anims.play('turn');
-    gameOver = true;
+    alert('ゲームオーバー');
+    location.reload();
 }
