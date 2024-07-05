@@ -36,10 +36,10 @@ function create() {
     this.add.rectangle(600, 450, 1200, 900, 0xFFFFFF).setOrigin(0.5, 0.5);
 
     // ゲーム説明テキストを表示
-    startText = this.add.text(600, 450, 'スペースキーを押してゲーム開始', { fontSize: '32px', fill: '#000' }).setOrigin(0.5, 0.5);
+    startText = this.add.text(600, 450, 'Enterキーを押してゲーム開始', { fontSize: '32px', fill: '#000' }).setOrigin(0.5, 0.5);
 
-    // スペースキー入力を検出
-    this.spaceBar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+    // Enterキー入力を検出
+    this.enterKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
 
     // ゲーム開始後に使う要素を予め作成
     this.player = this.physics.add.sprite(600, 750, 'player').setScale(0.5).setCollideWorldBounds(true).setVisible(false);
@@ -54,7 +54,7 @@ function create() {
     scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '32px', fill: '#000' }).setVisible(false);
 
     // ゲームが開始されていない状態でupdate関数の一部をスキップするためのフラグ
-    this.input.keyboard.on('keydown-SPACE', startGame, this);
+    this.input.keyboard.on('keydown-ENTER', startGame, this);
 }
 
 function startGame() {
@@ -128,7 +128,6 @@ function hitEnemy(bullet, enemy) {
 function hitPlayer(player, enemy) {
     this.physics.pause();
     player.setTint(0xff0000);
-    player.anims.play('turn');
     alert('ゲームオーバー');
     location.reload();
 }
