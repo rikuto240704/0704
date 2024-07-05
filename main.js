@@ -30,7 +30,7 @@ let scoreText;
 let lastEnemyTime = 0;
 
 function create() {
-    this.cameras.main.setBackgroundColor('#FFFFFF'); // 背景色を白色に設定
+    this.add.rectangle(400, 300, 800, 600, 0xFFFFFF).setOrigin(0.5, 0.5); // 背景色を白色に設定
 
     this.player = this.physics.add.sprite(400, 500, 'player').setScale(0.5); // サイズを小さく設定
     this.player.setCollideWorldBounds(true);
@@ -48,7 +48,7 @@ function create() {
     this.physics.add.collider(this.bullets, this.enemies, hitEnemy, null, this);
     this.physics.add.collider(this.player, this.enemies, hitPlayer, null, this);
 
-    scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '32px', fill: '#000' }); // スコアの色も黒に変更
+    scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '32px', fill: '#000' }); // スコアの色を黒に設定
 
     this.lastFired = 0;
 }
