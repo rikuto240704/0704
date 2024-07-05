@@ -36,10 +36,10 @@ function create() {
     this.add.rectangle(600, 450, 1200, 900, 0xFFFFFF).setOrigin(0.5, 0.5);
 
     // ゲーム説明テキストを表示
-    startText = this.add.text(600, 450, 'Enterキーを押してゲーム開始', { fontSize: '32px', fill: '#000' }).setOrigin(0.5, 0.5);
+    startText = this.add.text(600, 450, 'sキーを押してゲーム開始', { fontSize: '32px', fill: '#000' }).setOrigin(0.5, 0.5);
 
     // Enterキー入力を検出
-    this.enterKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
+    this.enterKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.s);
 
     // ゲーム開始後に使う要素を予め作成
     this.player = this.physics.add.sprite(600, 750, 'player').setScale(0.5).setCollideWorldBounds(true).setVisible(false);
