@@ -1,7 +1,7 @@
 const config = {
     type: Phaser.AUTO,
-    width: 1600, // 幅を2倍に
-    height: 1200, // 高さを2倍に
+    width: 1200, // 横幅を1.5倍に変更
+    height: 900, // 縦幅を1.5倍に変更
     physics: {
         default: 'arcade',
         arcade: {
@@ -28,46 +28,41 @@ function preload() {
 let score = 0;
 let scoreText;
 let lastEnemyTime = 0;
-let enemyInterval = 2000; // 初期の敵の落ちてくる間隔
 
 function create() {
-    this.add.rectangle(800, 600, 1600, 1200, 0xFFFFFF).setOrigin(0.5, 0.5); // フィールドの背景を設定
+    // 背景色を白色に設定
+    this.add.rectangle(600, 450, 1200, 900, 0xFFFFFF).setOrigin(0.5, 0.5);
 
-    this.player = this.physics.add.sprite(800, 1000, 'player').setScale(1); // プレイヤーの位置とスケールを調整
+    // プレイヤーのサイズを小さく設定
+    this.player = this.physics.add.sprite(600, 750, 'player').setScale(0.5); // サイズを小さく設定
     this.player.setCollideWorldBounds(true);
 
     this.cursors = this.input.keyboard.createCursorKeys();
     this.spaceBar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
 
+    // 弾のグループを作成
     this.bullets = this.physics.add.group({
         defaultKey: 'bullet',
         maxSize: 10
     });
 
+    // 敵のグループを作成
     this.enemies = this.physics.add.group();
 
+    // 弾と敵の衝突を検出
     this.physics.add.collider(this.bullets, this.enemies, hitEnemy, null, this);
+    // プレイヤーと敵の衝突を検出
     this.physics.add.collider(this.player, this.enemies, hitPlayer, null, this);
 
+    // スコア表示用のテキストを設定
     scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '32px', fill: '#000' });
 
+    // 最後に敵が出現した時間を初期化
     this.lastFired = 0;
-
-    // 最初の敵の落ちてくる時間を設定
-    scheduleNextEnemy(this.time.now);
 }
 
 function update(time) {
-    // 前後の移動
-    if (this.cursors.up.isDown) {
-        this.player.setVelocityY(-200);
-    } else if (this.cursors.down.isDown) {
-        this.player.setVelocityY(200);
-    } else {
-        this.player.setVelocityY(0);
-    }
-
-    // 左右の移動
+    // プレイヤーの移動
     if (this.cursors.left.isDown) {
         this.player.setVelocityX(-200);
     } else if (this.cursors.right.isDown) {
@@ -76,67 +71,51 @@ function update(time) {
         this.player.setVelocityX(0);
     }
 
-    // 前進移動
-    if (this.cursors.space.isDown) {
-        this.player.setVelocityX(200);
-    } else {
-        this.player.setVelocityX(0);
-    }
-
+    // スペースキーが押されたら弾を発射
     if (this.spaceBar.isDown && time > this.lastFired) {
         const bullet = this.bullets.get(this.player.x, this.player.y - 20);
         if (bullet) {
             bullet.setActive(true);
             bullet.setVisible(true);
             bullet.body.velocity.y = -300;
-            bullet.setScale(0.5);
+            bullet.setScale(0.5); // サイズを小さく設定
             this.lastFired = time + 300;
         }
     }
 
+    // 弾の自動除去
     this.bullets.children.each(function(bullet) {
         if (bullet.active && bullet.y < 0) {
             bullet.setActive(false);
             bullet.setVisible(false);
         }
     }, this);
-}
 
-function scheduleNextEnemy(currentTime) {
-    const delay = Phaser.Math.Between(1000, 3000); // ランダムな待機時間を計算
-    game.time.addEvent({
-        delay: delay,
-        callback: createEnemy,
-        callbackScope: this,
-        loop: false
-    });
+    // 敵のランダム出現
+    if (time > lastEnemyTime) {
+        const x = Phaser.Math.Between(75, 1125); // X座標を調整
+        const enemyType = Phaser.Math.Between(1, 2); // 1 または 2 をランダムに選択
+        const enemy = this.enemies.create(x, 0, 'enemy' + enemyType); // enemy1 または enemy2 を生成
+        enemy.setVelocityY(100);
+        enemy.setScale(0.5); // サイズを小さく設定
+        lastEnemyTime = time + 2000; // 次の敵が出現するまでの間隔を設定
+    }
 
-    // 次の敵の落ちてくる時間を設定
-    lastEnemyTime = currentTime + delay;
-}
-
-function createEnemy() {
-    const x = Phaser.Math.Between(100, 1500); // フィールド内の広い範囲に敵をランダムに配置
-    const enemyType = Phaser.Math.Between(1, 2);
-    const enemy = this.enemies.create(x, 0, 'enemy' + enemyType);
-    enemy.setVelocityY(100);
-    enemy.setScale(0.5);
-    enemy.hp = 2; // 2発撃たないと死なないようにHPを設定
-
-    // 次の敵の落ちてくる時間をスケジュール
-    scheduleNextEnemy(this.time.now);
+    // 敵の自動除去
+    this.enemies.children.each(function(enemy) {
+        if (enemy.active && enemy.y > 900) { // Y座標の条件を調整
+            enemy.destroy();
+        }
+    }, this);
 }
 
 function hitEnemy(bullet, enemy) {
     bullet.setActive(false);
     bullet.setVisible(false);
-    enemy.hp--; // 弾が当たったら敵のHPを減らす
+    enemy.destroy();
 
-    if (enemy.hp <= 0) {
-        enemy.destroy(); // HPが0以下になったら敵を破壊
-        score += 10;
-        scoreText.setText('Score: ' + score);
-    }
+    score += 10;
+    scoreText.setText('Score: ' + score);
 }
 
 function hitPlayer(player, enemy) {
